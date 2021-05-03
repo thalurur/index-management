@@ -23,8 +23,6 @@ import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagemen
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.ManagedIndexCoordinator
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.MetadataService
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.SkipExecution
-import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.transport.action.updateindexmetadata.TransportUpdateManagedIndexMetaDataAction
-import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.transport.action.updateindexmetadata.UpdateManagedIndexMetaDataAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.model.ManagedIndexConfig
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.model.ManagedIndexMetaData
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.model.Policy
@@ -55,6 +53,8 @@ import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagemen
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.transport.action.removepolicy.TransportRemovePolicyAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.transport.action.retryfailedmanagedindex.RetryFailedManagedIndexAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.transport.action.retryfailedmanagedindex.TransportRetryFailedManagedIndexAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.transport.action.updateindexmetadata.TransportUpdateManagedIndexMetaDataAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.indexstatemanagement.transport.action.updateindexmetadata.UpdateManagedIndexMetaDataAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.refreshanalyzer.RefreshSearchAnalyzerAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.refreshanalyzer.RestRefreshSearchAnalyzerAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.refreshanalyzer.TransportRefreshSearchAnalyzerAction
@@ -65,20 +65,20 @@ import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.RollupRunner
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.RollupSearchService
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.delete.DeleteRollupAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.delete.TransportDeleteRollupAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.explain.ExplainRollupAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.explain.TransportExplainRollupAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.get.GetRollupAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.get.GetRollupsAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.get.TransportGetRollupAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.get.TransportGetRollupsAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.index.IndexRollupAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.index.TransportIndexRollupAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.mapping.TransportUpdateRollupMappingAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.mapping.UpdateRollupMappingAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.start.StartRollupAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.start.TransportStartRollupAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.stop.StopRollupAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.stop.TransportStopRollupAction
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.explain.ExplainRollupAction
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.explain.TransportExplainRollupAction
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.get.GetRollupsAction
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.get.TransportGetRollupsAction
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.mapping.TransportUpdateRollupMappingAction
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.action.mapping.UpdateRollupMappingAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.actionfilter.FieldCapsFilter
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.interceptor.RollupInterceptor
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.Rollup
@@ -90,6 +90,33 @@ import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.resthandler.
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.resthandler.RestStartRollupAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.resthandler.RestStopRollupAction
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.settings.RollupSettings
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.TransformRunner
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.delete.DeleteTransformsAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.delete.TransportDeleteTransformsAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.explain.ExplainTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.explain.TransportExplainTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.get.GetTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.get.GetTransformsAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.get.TransportGetTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.get.TransportGetTransformsAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.index.IndexTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.index.TransportIndexTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.preview.PreviewTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.preview.TransportPreviewTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.start.StartTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.start.TransportStartTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.stop.StopTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.action.stop.TransportStopTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.model.Transform
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.model.TransformMetadata
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.resthandler.RestDeleteTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.resthandler.RestExplainTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.resthandler.RestGetTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.resthandler.RestIndexTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.resthandler.RestPreviewTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.resthandler.RestStartTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.resthandler.RestStopTransformAction
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.settings.TransformSettings
 import com.amazon.opendistroforelasticsearch.jobscheduler.spi.JobSchedulerExtension
 import com.amazon.opendistroforelasticsearch.jobscheduler.spi.ScheduledJobParser
 import com.amazon.opendistroforelasticsearch.jobscheduler.spi.ScheduledJobRunner
@@ -124,6 +151,7 @@ import org.elasticsearch.threadpool.ThreadPool
 import org.elasticsearch.transport.TransportInterceptor
 import org.elasticsearch.watcher.ResourceWatcherService
 import java.util.function.Supplier
+import org.elasticsearch.monitor.jvm.JvmService
 import org.elasticsearch.common.component.Lifecycle
 import org.elasticsearch.common.component.LifecycleComponent
 import org.elasticsearch.common.component.LifecycleListener
@@ -145,6 +173,7 @@ internal class IndexManagementPlugin : JobSchedulerExtension, NetworkPlugin, Act
         const val OPEN_DISTRO_BASE_URI = "/_opendistro"
         const val ISM_BASE_URI = "$OPEN_DISTRO_BASE_URI/_ism"
         const val ROLLUP_BASE_URI = "$OPEN_DISTRO_BASE_URI/_rollup"
+        const val TRANSFORM_BASE_URI = "$OPEN_DISTRO_BASE_URI/_transform"
         const val POLICY_BASE_URI = "$ISM_BASE_URI/policies"
         const val ROLLUP_JOBS_BASE_URI = "$ROLLUP_BASE_URI/jobs"
         const val INDEX_MANAGEMENT_INDEX = ".opendistro-ism-config"
@@ -180,6 +209,12 @@ internal class IndexManagementPlugin : JobSchedulerExtension, NetworkPlugin, Act
                         return@ScheduledJobParser Rollup.parse(xcp, id, jobDocVersion.seqNo, jobDocVersion.primaryTerm)
                     }
                     RollupMetadata.ROLLUP_METADATA_TYPE -> {
+                        return@ScheduledJobParser null
+                    }
+                    Transform.TRANSFORM_TYPE -> {
+                        return@ScheduledJobParser Transform.parse(xcp, id, jobDocVersion.seqNo, jobDocVersion.primaryTerm)
+                    }
+                    TransformMetadata.TRANSFORM_METADATA_TYPE -> {
                         return@ScheduledJobParser null
                     }
                     ManagedIndexMetaData.MANAGED_INDEX_METADATA_TYPE -> {
@@ -219,7 +254,14 @@ internal class IndexManagementPlugin : JobSchedulerExtension, NetworkPlugin, Act
             RestIndexRollupAction(),
             RestStartRollupAction(),
             RestStopRollupAction(),
-            RestExplainRollupAction()
+            RestExplainRollupAction(),
+            RestIndexTransformAction(),
+            RestGetTransformAction(),
+            RestPreviewTransformAction(),
+            RestDeleteTransformAction(),
+            RestExplainTransformAction(),
+            RestStartTransformAction(),
+            RestStopTransformAction()
         )
     }
 
@@ -251,6 +293,8 @@ internal class IndexManagementPlugin : JobSchedulerExtension, NetworkPlugin, Act
             .registerMetadataServices(RollupMetadataService(client, xContentRegistry))
             .registerConsumers()
         rollupInterceptor = RollupInterceptor(clusterService, settings, indexNameExpressionResolver)
+        val jvmService = JvmService(environment.settings())
+        val transformRunner = TransformRunner.initialize(client, clusterService, xContentRegistry, settings, indexNameExpressionResolver, jvmService)
         fieldCapsFilter = FieldCapsFilter(clusterService, settings, indexNameExpressionResolver)
         this.indexNameExpressionResolver = indexNameExpressionResolver
 
@@ -281,7 +325,9 @@ internal class IndexManagementPlugin : JobSchedulerExtension, NetworkPlugin, Act
         val managedIndexCoordinator = ManagedIndexCoordinator(environment.settings(),
             client, clusterService, threadPool, indexManagementIndices, metadataService, templateService)
 
-        return listOf(managedIndexRunner, rollupRunner, indexManagementIndices, managedIndexCoordinator, indexStateManagementHistory)
+        return listOf(
+            managedIndexRunner, rollupRunner, transformRunner, indexManagementIndices, managedIndexCoordinator, indexStateManagementHistory
+        )
     }
 
     override fun getSettings(): List<Setting<*>> {
@@ -311,7 +357,13 @@ internal class IndexManagementPlugin : JobSchedulerExtension, NetworkPlugin, Act
             RollupSettings.ROLLUP_INDEX,
             RollupSettings.ROLLUP_ENABLED,
             RollupSettings.ROLLUP_SEARCH_ENABLED,
-            RollupSettings.ROLLUP_DASHBOARDS
+            RollupSettings.ROLLUP_DASHBOARDS,
+            TransformSettings.TRANSFORM_JOB_INDEX_BACKOFF_COUNT,
+            TransformSettings.TRANSFORM_JOB_INDEX_BACKOFF_MILLIS,
+            TransformSettings.TRANSFORM_JOB_SEARCH_BACKOFF_COUNT,
+            TransformSettings.TRANSFORM_JOB_SEARCH_BACKOFF_MILLIS,
+            TransformSettings.TRANSFORM_CIRCUIT_BREAKER_ENABLED,
+            TransformSettings.TRANSFORM_CIRCUIT_BREAKER_JVM_THRESHOLD
         )
     }
 
@@ -335,7 +387,15 @@ internal class IndexManagementPlugin : JobSchedulerExtension, NetworkPlugin, Act
             ActionPlugin.ActionHandler(StartRollupAction.INSTANCE, TransportStartRollupAction::class.java),
             ActionPlugin.ActionHandler(StopRollupAction.INSTANCE, TransportStopRollupAction::class.java),
             ActionPlugin.ActionHandler(ExplainRollupAction.INSTANCE, TransportExplainRollupAction::class.java),
-            ActionPlugin.ActionHandler(UpdateRollupMappingAction.INSTANCE, TransportUpdateRollupMappingAction::class.java)
+            ActionPlugin.ActionHandler(UpdateRollupMappingAction.INSTANCE, TransportUpdateRollupMappingAction::class.java),
+            ActionPlugin.ActionHandler(IndexTransformAction.INSTANCE, TransportIndexTransformAction::class.java),
+            ActionPlugin.ActionHandler(GetTransformAction.INSTANCE, TransportGetTransformAction::class.java),
+            ActionPlugin.ActionHandler(GetTransformsAction.INSTANCE, TransportGetTransformsAction::class.java),
+            ActionPlugin.ActionHandler(PreviewTransformAction.INSTANCE, TransportPreviewTransformAction::class.java),
+            ActionPlugin.ActionHandler(DeleteTransformsAction.INSTANCE, TransportDeleteTransformsAction::class.java),
+            ActionPlugin.ActionHandler(ExplainTransformAction.INSTANCE, TransportExplainTransformAction::class.java),
+            ActionPlugin.ActionHandler(StartTransformAction.INSTANCE, TransportStartTransformAction::class.java),
+            ActionPlugin.ActionHandler(StopTransformAction.INSTANCE, TransportStopTransformAction::class.java)
         )
     }
 

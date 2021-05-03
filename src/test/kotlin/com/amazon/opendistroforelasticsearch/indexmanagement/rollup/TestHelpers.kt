@@ -29,16 +29,18 @@ import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.Rollup
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.RollupMetadata
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.RollupMetrics
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.RollupStats
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.dimension.DateHistogram
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.dimension.Dimension
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.dimension.Histogram
-import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.dimension.Terms
+import com.amazon.opendistroforelasticsearch.indexmanagement.common.model.dimension.DateHistogram
+import com.amazon.opendistroforelasticsearch.indexmanagement.common.model.dimension.Dimension
+import com.amazon.opendistroforelasticsearch.indexmanagement.common.model.dimension.Histogram
+import com.amazon.opendistroforelasticsearch.indexmanagement.common.model.dimension.Terms
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.metric.Average
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.metric.Max
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.metric.Metric
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.metric.Min
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.metric.Sum
 import com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.metric.ValueCount
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.model.ExplainTransform
+import com.amazon.opendistroforelasticsearch.indexmanagement.transform.randomTransformMetadata
 import org.elasticsearch.common.xcontent.ToXContent
 import org.elasticsearch.common.xcontent.XContentFactory
 import org.elasticsearch.index.query.TermQueryBuilder
@@ -176,6 +178,11 @@ fun randomExplainRollup(): ExplainRollup {
     return ExplainRollup(metadataID = metadata.id, metadata = metadata)
 }
 
+fun randomExplainTransform(): ExplainTransform {
+    val metadata = randomTransformMetadata()
+    return ExplainTransform(metadataID = metadata.id, metadata = metadata)
+}
+
 fun randomISMRollup(): ISMRollup {
     return ISMRollup(
         description = ESRestTestCase.randomAlphaOfLength(10),
@@ -184,6 +191,11 @@ fun randomISMRollup(): ISMRollup {
         dimensions = randomRollupDimensions(),
         metrics = ESRestTestCase.randomList(20, ::randomRollupMetrics).distinctBy { it.targetField }
     )
+}
+
+fun randomDimension(): Dimension {
+    val dimensions = listOf(randomTerms(), randomHistogram(), randomDateHistogram())
+    return ESRestTestCase.randomSubsetOf(1, dimensions).first()
 }
 
 fun randomISMFieldCapabilities(): ISMFieldCapabilities {

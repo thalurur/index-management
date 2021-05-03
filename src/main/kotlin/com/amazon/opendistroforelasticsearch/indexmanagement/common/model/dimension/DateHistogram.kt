@@ -13,8 +13,9 @@
  * permissions and limitations under the License.
  */
 
-package com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.dimension
+package com.amazon.opendistroforelasticsearch.indexmanagement.common.model.dimension
 
+import com.amazon.opendistroforelasticsearch.indexmanagement.util.IndexUtils.Companion.getFieldFromMappings
 import org.elasticsearch.common.io.stream.StreamInput
 import org.elasticsearch.common.io.stream.StreamOutput
 import org.elasticsearch.common.xcontent.ToXContent
@@ -26,6 +27,9 @@ import org.elasticsearch.search.aggregations.AggregatorFactories
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder
 import java.io.IOException
 import java.time.ZoneId
+import org.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder
+import org.elasticsearch.search.aggregations.bucket.composite.DateHistogramValuesSourceBuilder
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval
 
 data class DateHistogram(
     override val sourceField: String,
@@ -68,6 +72,30 @@ data class DateHistogram(
         out.writeOptionalString(fixedInterval)
         out.writeOptionalString(calendarInterval)
         out.writeZoneId(timezone)
+    }
+
+    override fun toSourceBuilder(appendType: Boolean): CompositeValuesSourceBuilder<*> {
+        val calendarInterval = this.calendarInterval
+        val fixedInterval = this.fixedInterval
+        val name = if (appendType) "${this.targetField}.${Type.DATE_HISTOGRAM.type}" else this.targetField
+
+        return DateHistogramValuesSourceBuilder(name)
+            .missingBucket(true)
+            .field(this.sourceField)
+            .timeZone(this.timezone)
+            .apply {
+                calendarInterval?.let {
+                    this.calendarInterval(DateHistogramInterval(it))
+                }
+                fixedInterval?.let {
+                    this.fixedInterval(DateHistogramInterval(it))
+                }
+            }
+    }
+
+    override fun canBeRealizedInMappings(mappings: Map<String, Any>): Boolean {
+        val fieldType = getFieldFromMappings(sourceField, mappings)?.get("type") ?: return false
+        return "date" == fieldType
     }
 
     fun getRewrittenAggregation(

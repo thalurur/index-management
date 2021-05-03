@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package com.amazon.opendistroforelasticsearch.indexmanagement.rollup.model.dimension
+package com.amazon.opendistroforelasticsearch.indexmanagement.common.model.dimension
 
 import org.elasticsearch.common.io.stream.Writeable
 import org.elasticsearch.common.xcontent.ToXContentObject
@@ -21,6 +21,7 @@ import org.elasticsearch.common.xcontent.XContentParser
 import org.elasticsearch.common.xcontent.XContentParser.Token
 import org.elasticsearch.common.xcontent.XContentParserUtils.ensureExpectedToken
 import java.io.IOException
+import org.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder
 
 abstract class Dimension(
     val type: Type,
@@ -36,6 +37,15 @@ abstract class Dimension(
             return type
         }
     }
+
+    abstract fun toSourceBuilder(appendType: Boolean = false): CompositeValuesSourceBuilder<*>
+
+    /**
+     * Helper method that evaluates if the dimension can be realized using mappings provided.
+     *
+     * e.g. A date_histogram dimension on source_field "a" can only be possible in mappings that contain "date" type field "a".
+     */
+    abstract fun canBeRealizedInMappings(mappings: Map<String, Any>): Boolean
 
     companion object {
         const val DIMENSION_SOURCE_FIELD_FIELD = "source_field"
